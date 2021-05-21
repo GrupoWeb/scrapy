@@ -16,3 +16,8 @@ Route::get('/','scrapyController@index');
 Auth::routes();
 
 Route::get('dashboard','scrapyController@home');
+
+Route::get('lista','scrapyController@lista')->name('lista');
+Route::get('categorias','scrapyController@categories')->name('categorias');
+Route::get('productos','scrapyController@products')->name('productos');
+Route::get('busqueda','scrapyController@search')->name('busqueda');

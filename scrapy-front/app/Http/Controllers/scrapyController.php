@@ -13,4 +13,20 @@ class scrapyController extends Controller
     public function home(){
         return view('home');
     }
+
+    public function lista(){
+        return view('scrapy.lista');
+    }
+
+    public function categories(){
+        return view('scrapy.categories');
+    }
+
+    public function products(){
+        return view('scrapy.products');
+    }
+
+    public function search(){
+        return view('scrapy.search');
+    }
 }
