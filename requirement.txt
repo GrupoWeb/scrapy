@@ -7,3 +7,4 @@ tweepy
 pandas
 matplotlib
 seaborn
+flask-mysqldb

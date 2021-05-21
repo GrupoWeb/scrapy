@@ -6,10 +6,10 @@ import seaborn as sns
 
 
 class cachePool():
-  def Stream(auth,tweepyListener):
+  def Stream(auth,tweepyListener,listFilter):
     transform = word_text.Transform()
     stream = tweepy.Stream(auth, tweepyListener)
-    filter = ['mitsubishi','mazda','toyota','audi']
+    filter = listFilter
     stream.filter(track=filter)
     tweets_data_path = 'tweets.txt'
     tweets_data = []
@@ -17,22 +17,21 @@ class cachePool():
     for line in tweets_file:
       tweet = json.loads(line)
       tweets_data.append(tweet)
-
     tweets_file.close()
-
-    print(tweets_data[0].keys())
-
     rows = [] 
-
+    # print(tweets_data)
     for data in tweets_data: 
       data_row = data['user'] 
       rows.append(data_row)
-
     df = pd.DataFrame(rows)
     df2 = pd.DataFrame(tweets_data, columns=['text'])
     df = df.join(df2)
+    return tweet
+    # return df
+    # print(tweets_data[0].keys())
     # print(df[['screen_name','text']]) 
 
+    
     # print(df)
 
     # [p, q, r, s] = [0, 0, 0, 0]
