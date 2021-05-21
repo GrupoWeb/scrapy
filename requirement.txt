@@ -1,1 +1,9 @@
-flask Flask-SQLAlchemy flask-marshmallow marshmallow-sqlalchemy pymysql
+flask 
+Flask-SQLAlchemy 
+flask-marshmallow 
+marshmallow-sqlalchemy 
+pymysql
+tweepy 
+pandas
+matplotlib
+seaborn

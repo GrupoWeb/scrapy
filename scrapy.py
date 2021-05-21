@@ -45,6 +45,7 @@ def word_in_text(word, text):
 # Initialize Stream listener
 l = MyStreamListener()
 
+
 # Create your Stream object with authentication
 stream = tweepy.Stream(auth, l)
 
