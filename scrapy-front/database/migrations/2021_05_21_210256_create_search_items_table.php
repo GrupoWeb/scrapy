@@ -17,12 +17,14 @@ class CreateSearchItemsTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('master_id')->unsigned();
             $table->bigInteger('categories_id')->unsigned();
+            $table->bigInteger('products_id')->unsigned();
             $table->bigInteger('status_id')->unsigned();
 
             $table->timestamps();
 
             $table->foreign('master_id')->references('id')->on('search_masters');
             $table->foreign('categories_id')->references('id')->on('categories');
+            $table->foreign('products_id')->references('id')->on('products');
             $table->foreign('status_id')->references('id')->on('status');
         });
     }

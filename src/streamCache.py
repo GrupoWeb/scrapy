@@ -26,7 +26,7 @@ class cachePool():
     df = pd.DataFrame(rows)
     df2 = pd.DataFrame(tweets_data, columns=['text'])
     df = df.join(df2)
-    return tweet
+    return df
     # return df
     # print(tweets_data[0].keys())
     # print(df[['screen_name','text']]) 

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_mysqldb import MySQL
@@ -22,6 +23,7 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'scrapyn'
 mysql = MySQL(app)
+CORS(app)
 
 app.secret_key = "mysecretkey"
 
@@ -29,18 +31,131 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 
 # Route API
-@app.route('/scrapyn/<filtro>', methods=['GET'])   
-def conectionPool(filtro):
+@app.route('/categorie', methods=['POST'])
+def setCategories():
+    name = request.json['name']
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO categories (name,status_id) VALUES (%s,1)", [name])
+    mysql.connection.commit()
+    return 'ok'
+
+@app.route('/categories', methods=['GET'])  
+def getCategories():
     listFilter = mysql.connection.cursor()
-    listFilter.execute('SELECT description FROM filter WHERE filter = "auto"')
+    listFilter.execute('SELECT id as code, name  FROM categories WHERE status_id = 1')
+    data = listFilter.fetchall()
+    row_headers=[x[0] for x in listFilter.description] 
+    filterList = []
+    print(type(row_headers))
+    for result in data:
+        filterList.append(dict(zip(row_headers,result)))
+    listFilter.close()
+    return json.dumps(filterList)
+
+@app.route('/categoriesD', methods=['POST'])   
+def deleteCategorie():
+    id = request.json['id']
+    listFilter = mysql.connection.cursor()
+    listFilter.execute('UPDATE categories SET status_id = 2 WHERE id = %s', [id])
+    mysql.connection.commit()
+    return 'ok'
+
+@app.route('/product', methods=['POST'])
+def setProduct():
+    name = request.json['name']
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO products (name,status_id) VALUES (%s,1)", [name])
+    mysql.connection.commit()
+    return 'ok'
+
+@app.route('/products', methods=['GET'])  
+def getProducts():
+    listFilter = mysql.connection.cursor()
+    listFilter.execute('SELECT id as code, name  FROM products WHERE status_id = 1')
+    data = listFilter.fetchall()
+    row_headers=[x[0] for x in listFilter.description] 
+    filterList = []
+    for result in data:
+        filterList.append(dict(zip(row_headers,result)))
+    listFilter.close()
+    return json.dumps(filterList)
+
+@app.route('/productD', methods=['POST'])   
+def deleteProduct():
+    id = request.json['id']
+    listFilter = mysql.connection.cursor()
+    listFilter.execute('UPDATE products SET status_id = 2 WHERE id = %s', [id])
+    mysql.connection.commit()
+    return 'ok'
+
+@app.route('/search', methods=['POST'])
+def setSearch():
+    name = request.json['name']
+    categorie = request.json['categorie']
+    products = request.json['products']
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO search_masters (name) VALUES (%s)", [name])
+    mysql.connection.commit()
+    cur.execute('select id from search_masters where name = %s', [name])
+    data = cur.fetchall()
+    row_headers=[x[0] for x in cur.description] 
+    filterList = []
+    for result in data:
+        filterList.append(dict(zip(row_headers,result)))
+    id_data = filterList[0]['id']
+    for item in products:
+        cur.execute('INSERT INTO search_items (master_id, categories_id, products_id, status_id) VALUES(%s,%s,%s,1)', [int(id_data), int(categorie), int(item)])
+        mysql.connection.commit()
+    return 'ok'
+
+@app.route('/search', methods=['GET'])
+def getSearch():
+    listFilter = mysql.connection.cursor()
+    listFilter.execute('SELECT id as code, name FROM search_masters')
+    data = listFilter.fetchall()
+    row_headers=[x[0] for x in listFilter.description] 
+    filterList = []
+    for result in data:
+        filterList.append(dict(zip(row_headers,result)))
+    listFilter.close()
+    return json.dumps(filterList)
+
+
+@app.route('/scrapyn', methods=['GET'])   
+def conectionPool():
+    listFilter = mysql.connection.cursor()
+    listFilter.execute('SELECT name FROM status')
     data = listFilter.fetchall()
     filterList = []
     for result in data:
         filterList.append(result[0])
     listFilter.close()
     json_response = []
-    for tweet in tweepy.Cursor(api.search, q=filtro, tweet_mode="extended").items(10):
-        json_response.append({ 'user' : tweet._json['user']})
+    json_data = []
+    filter="juan"
+    header_data = ['item','count']
+    # for tweet in tweepy.Cursor(api.search, q='ferreteria', tweet_mode="extended").items(10):
+    #     json_response.append(tweet._json)
+        # json_response.append({ 'user' : tweet._json['user']})
+    for tweet in api.search(q=filter, lang="en", rpp=100):
+        json_response.append(f"{tweet.user.name}:{tweet.text}")
+
+    # json_data.append(json.dumps({ 'item' : filter, 'count' : len(json_response)}))
+    json_data.append(dict(zip(header_data,filter)))
+    # print(len(json_response))
+    return jsonify(json_response)
+    # return 'ok'
+
+@app.route('/listas', methods=['GET'])   
+def searchPool():
+    filter = ['mazda','toyota']
+    resultado = StreamListener.MyStreamListener()
+    cache = streamCache.cachePool.Stream(auth, resultado,filter)
+    print(cache)
+    json_response = []
+    for item in cache:
+        json_response.append({ 'user' : item})
+    # return jsonify(json_response)
     return jsonify(json_response)
 
 @app.route('/scrapy-list', methods=['POST'])
@@ -51,54 +166,6 @@ def create_filter():
     cur.execute("INSERT INTO filter (description, filter) VALUES (%s,%s)", (description, filter))
     mysql.connection.commit()
     return 'ok'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-@app.route('/tasks', methods=['GET'])
-def get_tasks():
-    all_tasks = Task.query.all()
-    result =tasks_schema.dump(all_tasks)
-    return jsonify(result)
-
-@app.route('/tasks/<id>', methods=['GET'])
-def get_task(id):
-    task = Task.query.get(id)
-    return task_schema.jsonify(task)
-
-@app.route('/tasks/<id>', methods=['PUT'])
-def update_task(id):
-    task = Task.query.get(id)
-
-    title = request.json[0]['title']
-
-    task.title  = title
-    db.session.commit()
-    return task_schema.jsonify(task)
-
-@app.route('/tasks/<id>', methods=['DELETE'])
-def delete_task(id):
-    task = Task.query.get(id)
-
-    db.session.delete(task)
-    db.session.commit()
-    return task_schema.jsonify(task)
 
 
 if __name__ == "__main__":
