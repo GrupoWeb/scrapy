@@ -5,12 +5,14 @@
  */
 
 require('bootstrap');
+require('chart.js');
 
 window.Vue = require('vue');
 
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import VueSweetalert2 from 'vue-sweetalert2';
+
 
 // If you don't need the styles, do not connect
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -34,7 +36,8 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
 Vue.component('create-list', require('./components/create.vue').default);
 Vue.component('create-categories', require('./components/catalogos/categories.vue').default);
 Vue.component('create-products', require('./components/catalogos/products.vue').default);
-Vue.component('create-search', require('./components/catalogos/search.vue').default);
+Vue.component('create-search', require('./components/catalogos/search.vue').default); 
+Vue.component('inteligencia', require('./components/catalogos/intelligence.vue').default); 
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

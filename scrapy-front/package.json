@@ -24,7 +24,9 @@
         "vue-template-compiler": "^2.6.12"
     },
     "dependencies": {
+        "chart.js": "^2.9.4",
         "element-ui": "^2.15.1",
+        "vue-loading-spinner": "^1.0.11",
         "vue-sweetalert2": "^4.3.1"
     }
 }

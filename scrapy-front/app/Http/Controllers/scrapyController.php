@@ -29,4 +29,9 @@ class scrapyController extends Controller
     public function search(){
         return view('scrapy.search');
     }
+
+    public function intelligence(){
+        return view ('scrapy.intelligence');
+    }
+
 }

@@ -121,29 +121,38 @@ def getSearch():
     return json.dumps(filterList)
 
 
-@app.route('/scrapyn', methods=['GET'])   
+@app.route('/scrapyn', methods=['POST'])   
 def conectionPool():
+    master_id = request.json['master_id']
     listFilter = mysql.connection.cursor()
-    listFilter.execute('SELECT name FROM status')
+    listFilter.execute('SELECT p.name FROM search_items sit INNER JOIN products p ON sit.products_id = p.id WHERE master_id = %s',[master_id])
     data = listFilter.fetchall()
     filterList = []
+    row_headers = ['name','count']
+    json_data = []
     for result in data:
         filterList.append(result[0])
+        count_data = []
+        for tweet in api.search(q=result[0], lang="en", rpp=100):
+            count_data.append(f"{tweet.user.name}:{tweet.text}")
+            tuplas = (result[0],len(count_data))
+        json_data.append(dict(zip(row_headers,tuplas)))
     listFilter.close()
-    json_response = []
-    json_data = []
-    filter="juan"
-    header_data = ['item','count']
+    return jsonify(json_data)
+
+    # json_response = []
+    # json_data = []
+    # filter="juan"
+    
     # for tweet in tweepy.Cursor(api.search, q='ferreteria', tweet_mode="extended").items(10):
     #     json_response.append(tweet._json)
         # json_response.append({ 'user' : tweet._json['user']})
-    for tweet in api.search(q=filter, lang="en", rpp=100):
-        json_response.append(f"{tweet.user.name}:{tweet.text}")
+    # for tweet in api.search(q=filter, lang="en", rpp=100):
+    #     json_response.append(f"{tweet.user.name}:{tweet.text}")
 
     # json_data.append(json.dumps({ 'item' : filter, 'count' : len(json_response)}))
-    json_data.append(dict(zip(header_data,filter)))
+    # json_data.append(dict(zip(header_data,filter)))
     # print(len(json_response))
-    return jsonify(json_response)
     # return 'ok'
 
 @app.route('/listas', methods=['GET'])   
@@ -166,6 +175,18 @@ def create_filter():
     cur.execute("INSERT INTO filter (description, filter) VALUES (%s,%s)", (description, filter))
     mysql.connection.commit()
     return 'ok'
+
+@app.route('/getIntelligence', methods=['GET'])
+def intelligence():
+    cursor = mysql.connection.cursor()
+    SQL = 'SELECT id as code, name FROM search_masters'
+    cursor.execute(SQL)
+    data = cursor.fetchall()
+    response_data = []
+    row_headers=[x[0] for x in cursor.description] 
+    for item in data:
+        response_data.append(dict(zip(row_headers,item)))
+    return json.dumps(response_data)
 
 
 if __name__ == "__main__":

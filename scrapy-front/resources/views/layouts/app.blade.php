@@ -53,7 +53,7 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('lista') }}">{{ __('Análisis') }}</a>
+                                <a class="nav-link" href="{{ route('inteligencia') }}">{{ __('Análisis') }}</a>
                             </li>
                         @endguest
                     </ul>
