@@ -184,6 +184,7 @@ def intelligence():
     data = cursor.fetchall()
     response_data = []
     row_headers=[x[0] for x in cursor.description] 
+    
     for item in data:
         response_data.append(dict(zip(row_headers,item)))
     return json.dumps(response_data)
